@@ -5,12 +5,15 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  TouchableHighlight,
+  Button,
+  TouchableOpacity,
   View,
   TextInput,
   ListView,
   Platform,
 } from 'react-native';
+import Login from './Login'
+import UserList from './UserList'
 
 import io from 'socket.io-client';
 
@@ -25,6 +28,8 @@ import {
   MediaStreamTrack,
   getUserMedia,
 } from 'react-native-webrtc';
+
+// console.disableYellowBox = true
 
 const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 
@@ -213,7 +218,7 @@ socket.on('connect', function(data) {
   getLocalStream(true, function(stream) {
     localStream = stream;
     container.setState({selfViewSrc: stream.toURL()});
-    container.setState({status: 'ready', info: 'Please enter or create room ID'});
+    container.setState({status: 'ready', info: 'Please enter room ID'});
   });
 });
 
@@ -256,6 +261,9 @@ const RCTWebRTCDemo = React.createClass({
       textRoomConnected: false,
       textRoomData: [],
       textRoomValue: '',
+
+      appState: 'login',
+      username: '',
     };
   },
   componentDidMount: function() {
@@ -313,55 +321,84 @@ const RCTWebRTCDemo = React.createClass({
         <TextInput
           style={{width: 200, height: 30, borderColor: 'gray', borderWidth: 1}}
           onChangeText={value => this.setState({textRoomValue: value})}
-          value={this.state.textRoomValue}
-        />
-        <TouchableHighlight
+          value={this.state.textRoomValue} />
+        <TouchableOpacity
           onPress={this._textRoomPress}>
           <Text>Send</Text>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
     );
   },
+  setAppState(appState) {
+    this.setState({ appState })
+  },
+  setUsername(username) {
+    this.setState({ username })
+  },
+  onSignOut() {
+    this.setAppState('login')
+
+    // Added.
+    // const initial = this.getInitialState()
+    // this.setState(initial)
+    // for (const id in pcPeers) {
+    //   leave(id)
+    // }
+  },
   render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          {this.state.info}
-        </Text>
-        {this.state.textRoomConnected && this._renderTextRoom()}
-        <View style={{flexDirection: 'row'}}>
-          <Text>
-            {this.state.isFront ? "Use front camera" : "Use back camera"}
-          </Text>
-          <TouchableHighlight
-            style={{borderWidth: 1, borderColor: 'black'}}
-            onPress={this._switchVideoType}>
-            <Text>Switch camera</Text>
-          </TouchableHighlight>
+    if (this.state.appState === 'login') {
+      return <Login onSetAppState={this.setAppState} />
+    } else if (this.state.appState === 'list') {
+      return <UserList onSetAppState={this.setAppState} onSetUsername={this.setUsername} />
+    } else if (this.state.appState === 'main') {
+      return (
+        <View style={styles.wrapper}>
+        {this.state.username &&
+          <TouchableOpacity onPress={this.onSignOut}>
+            <Text style={styles.username}>{this.state.username}</Text>
+          </TouchableOpacity>}
+          <View style={styles.container}>
+            <Text style={styles.welcome}>
+              {this.state.info}
+            </Text>
+            {/* {this.state.textRoomConnected && this._renderTextRoom()} */}
+            {/* <View style={{flexDirection: 'row'}}>
+              <Text>
+                {this.state.isFront ? "Use front camera" : "Use back camera"}
+              </Text>
+              <TouchableOpacity
+                style={{borderWidth: 1, borderColor: 'black'}}
+                onPress={this._switchVideoType}>
+                <Text>Switch camera</Text>
+              </TouchableOpacity>
+            </View> */}
+            { this.state.status == 'ready' ?
+              (<View style={styles.readyContainer}>
+                <View style={{borderBottomWidth: 1, borderBottomColor: '#00aaed', width: '70%', alignSelf: 'center'}}>
+                  <TextInput
+                    ref='roomID'
+                    autoCorrect={false}
+                    style={{ width: '100%', height: 40, alignSelf: 'center'}}
+                    onChangeText={(text) => this.setState({roomID: text})}
+                    value={this.state.roomID} />
+                </View>
+                <TouchableOpacity style={{marginTop: 10}}>
+                  <Button title="Enter room" onPress={this._press} />
+                </TouchableOpacity>
+              </View>) : null
+            }
+            <RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
+            {
+              mapHash(this.state.remoteList, function(remote, index) {
+                return <RTCView key={index} streamURL={remote} style={styles.remoteView}/>
+              })
+            }
+          </View>
         </View>
-        { this.state.status == 'ready' ?
-          (<View>
-            <TextInput
-              ref='roomID'
-              autoCorrect={false}
-              style={{width: 200, height: 40, borderColor: 'gray', borderWidth: 1}}
-              onChangeText={(text) => this.setState({roomID: text})}
-              value={this.state.roomID}
-            />
-            <TouchableHighlight
-              onPress={this._press}>
-              <Text>Enter room</Text>
-            </TouchableHighlight>
-          </View>) : null
-        }
-        <RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
-        {
-          mapHash(this.state.remoteList, function(remote, index) {
-            return <RTCView key={index} streamURL={remote} style={styles.remoteView}/>
-          })
-        }
-      </View>
-    );
+      )
+    } else {
+      <Text style={styles.stateError}>Oops...</Text>
+    }
   }
 });
 
@@ -377,7 +414,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,
@@ -387,6 +423,24 @@ const styles = StyleSheet.create({
   listViewContainer: {
     height: 150,
   },
+  stateError: {
+    justifyContent: 'center',
+    color: 'red',
+    fontSize: 22,
+  },
+  username: {
+    fontSize: 18,
+    marginVertical: 30,
+    marginHorizontal: 20,
+    color: '#007AFF'
+  },
+  readyContainer: {
+    justifyContent: 'center',
+  },
+  wrapper: {
+    height: '100%',
+    backgroundColor: '#F5FCFF',
+  }
 });
 
 AppRegistry.registerComponent('RCTWebRTCDemo', () => RCTWebRTCDemo);
