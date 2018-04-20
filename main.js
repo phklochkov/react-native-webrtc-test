@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Login from './Login'
 import UserList from './UserList'
+import NotificationsIOS from 'react-native-notifications'
 
 import io from 'socket.io-client';
 
@@ -35,6 +36,24 @@ const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 
 const pcPeers = {};
 let localStream;
+
+let localNotification = null
+
+function scheduleNotification(msg) {
+  if (localNotification) {
+    NotificationsIOS.cancelLocalNotification(localNotification)
+  }
+
+  localNotification = NotificationsIOS.localNotification({
+    alertBody: msg,
+    alertTitle: "Skylight WebRTC Demo",
+    soundName: "chime.aiff",
+      silent: false,
+    category: "SOME_CATEGORY",
+    userInfo: { },
+    // fireDate: Date.now() + 5000
+  })
+}
 
 function getLocalStream(isFront, callback) {
 
@@ -127,6 +146,7 @@ function createPC(socketId, isOffer) {
   pc.onaddstream = function (event) {
     console.log('onaddstream', event.stream);
     container.setState({info: 'One peer join!'});
+    scheduleNotification('A new peer has joined!')
 
     const remoteList = container.state.remoteList;
     remoteList[socketId] = event.stream.toURL();
@@ -202,8 +222,8 @@ function leave(socketId) {
 
   const remoteList = container.state.remoteList;
   delete remoteList[socketId]
-  container.setState({ remoteList: remoteList });
-  container.setState({info: 'One peer leave!'});
+  container.setState({ remoteList, info: 'One peer leave!' });
+  scheduleNotification('Peer has left')
 }
 
 socket.on('exchange', function(data){
@@ -262,7 +282,7 @@ const RCTWebRTCDemo = React.createClass({
       textRoomData: [],
       textRoomValue: '',
 
-      appState: 'login',
+      appState: 'main', // 'login'
       username: '',
     };
   },
@@ -353,10 +373,10 @@ const RCTWebRTCDemo = React.createClass({
     } else if (this.state.appState === 'main') {
       return (
         <View style={styles.wrapper}>
-        {this.state.username &&
+        {this.state.username ?
           <TouchableOpacity onPress={this.onSignOut}>
             <Text style={styles.username}>{this.state.username}</Text>
-          </TouchableOpacity>}
+          </TouchableOpacity> : null}
           <View style={styles.container}>
             <Text style={styles.welcome}>
               {this.state.info}
@@ -372,6 +392,11 @@ const RCTWebRTCDemo = React.createClass({
                 <Text>Switch camera</Text>
               </TouchableOpacity>
             </View> */}
+            <View style={styles.notificationContainer}>
+              <TouchableOpacity>
+                <Button title="Schedule local notification" onPress={() => scheduleNotification('Test')} />
+              </TouchableOpacity>
+            </View>
             { this.state.status == 'ready' ?
               (<View style={styles.readyContainer}>
                 <View style={{borderBottomWidth: 1, borderBottomColor: '#00aaed', width: '70%', alignSelf: 'center'}}>
@@ -440,6 +465,9 @@ const styles = StyleSheet.create({
   wrapper: {
     height: '100%',
     backgroundColor: '#F5FCFF',
+  },
+  notificationContainer: {
+
   }
 });
 
