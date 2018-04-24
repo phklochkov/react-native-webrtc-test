@@ -15,19 +15,19 @@ let localStream;
 let localNotification = null
 
 function scheduleNotification(msg) {
-  if (localNotification) {
-    NotificationsIOS.cancelLocalNotification(localNotification)
-  }
+  // if (localNotification) {
+  //   NotificationsIOS.cancelLocalNotification(localNotification)
+  // }
 
-  localNotification = NotificationsIOS.localNotification({
-    alertBody: msg,
-    alertTitle: "Skylight WebRTC Demo",
-    soundName: "chime.aiff",
-      silent: false,
-    category: "SOME_CATEGORY",
-    userInfo: { },
-    fireDate: Date.now() + 500,
-  })
+  // localNotification = NotificationsIOS.localNotification({
+  //   alertBody: msg,
+  //   alertTitle: "Skylight WebRTC Demo",
+  //   soundName: "chime.aiff",
+  //     silent: false,
+  //   category: "SOME_CATEGORY",
+  //   userInfo: { },
+  //   fireDate: Date.now() + 500,
+  // })
 }
 
 function getLocalStream(isFront, callback) {
@@ -205,11 +205,18 @@ function leave(socketId) {
 let socket = null
 
 function initSocket() {
+  console.log('initSocket')
   if (socket) {
     return
   }
 
-  socket = io.connect('https://react-native-webrtc.herokuapp.com', {transports: ['websocket']})
+  socket = io.connect('http://172.26.8.180:4443', {
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax : 5000,
+    reconnectionAttempts: 99999
+  })
 
   socket.on('exchange', function(data){
     exchange(data)
@@ -351,11 +358,11 @@ export default class extends React.Component {
           <Text style={styles.username}>{this.props.username}</Text>
         </TouchableOpacity> : null}
         <View style={styles.container}>
-          <View style={styles.notificationContainer}>
+          {/* <View style={styles.notificationContainer}>
             <TouchableOpacity>
               <Button title="Schedule local notification" onPress={() => scheduleNotification('Test')} />
             </TouchableOpacity>
-          </View>
+          </View> */}
           <Text style={styles.welcome}>
             {this.state.info}
           </Text>
