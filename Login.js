@@ -1,7 +1,8 @@
 import React from 'react'
 import {KeyboardAvoidingView, View, Text, TextInput, StyleSheet,
   TouchableOpacity, Button, Image} from 'react-native'
-import {postLogin} from './http'
+import {postLogin} from './lib/http'
+import MaterialInput from './components/MaterialInput'
 
 export default class extends React.Component {
   state = { domain: '', login: '', password: '', error: null }
@@ -26,34 +27,37 @@ export default class extends React.Component {
 
   render() {
     return (
-      <KeyboardAvoidingView style={styles.container} behavior="position">
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
 
         <Image source={require('./skylight-logo.png')} style={styles.logo} />
 
         <View style={styles.inputContainer}>
-          <Text>Domain: </Text>
-          <TextInput
+          <Text>Domain</Text>
+          <MaterialInput
+            inputStyles={styles.input}
+            contextMenuHidden={true}
             autoCapitalize = 'none'
-            style={styles.input}
             onChangeText={v => this.onChange('domain', v)}
             value={this.state.domain} />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text>Login: </Text>
-          <TextInput
+          <Text>Login</Text>
+          <MaterialInput
+            inputStyles={styles.input}
+            contextMenuHidden={true}
             autoCapitalize = 'none'
-            style={styles.input}
             onChangeText={v => this.onChange('login', v)}
             value={this.state.login} />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text>Password: </Text>
-          <TextInput
-            autoCapitalize = 'none'
+          <Text>Password</Text>
+          <MaterialInput
+            inputStyles={styles.input}
+            contextMenuHidden={true}
             secureTextEntry={true}
-            style={styles.input}
+            autoCapitalize = 'none'
             onChangeText={v => this.onChange('password', v)}
             value={this.state.password} />
         </View>
@@ -69,11 +73,11 @@ export default class extends React.Component {
 
 const styles = StyleSheet.create({
   logo: {
-    width: 220,
-    height: 180,
+    width: 160,
+    height: 130,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 10,
   },
   container: {
     flex: 1,
@@ -84,13 +88,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'column',
-    // width:  '120%',
-    borderBottomColor: '#00aaed',
-    borderBottomWidth: 1,
+    width: '100%',
     marginVertical: 10,
   },
   input: {
-    height: 40,
+    marginTop: 5,
   },
   errorText: {
     color: '#ff0033',
