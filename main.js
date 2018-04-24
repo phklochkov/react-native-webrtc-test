@@ -12,16 +12,21 @@ import Call from './Call'
 
 class RCTWebRTCDemo extends React.Component {
   state = {
-    appState: 'main',
+    appState: 'login',
     username: '',
+    token: null
   }
 
   onPushRegistered = (deviceToken) => {
     // Send the token to server so it could send back push notifications...
     console.log("Device Token Received", deviceToken)
     sendDeviceToken(deviceToken)
-      .then(r => console.log('result', r))
-      .catch(e => console.log('error', e))
+      .then(r => {
+        this.setState({token: deviceToken})
+      })
+      .catch(e => {
+        console.log('error', e)
+      })
   }
 
   onPushRegistrationFailed = (error) => {
@@ -56,7 +61,10 @@ class RCTWebRTCDemo extends React.Component {
       case 'list':
         return <UserList onSetAppState={this.setAppState} onSetUsername={this.setUsername} />
       case 'main':
-        return <Call onSetAppState={this.setAppState} username={this.state.username} />
+        return <Call
+          onSetAppState={this.setAppState}
+          username={this.state.username}
+          token={this.state.token} />
       default:
         return <Text style={{justifyContent: 'center', color: 'red', fontSize: 22,}}>Oops...</Text>
     }

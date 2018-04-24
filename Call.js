@@ -12,24 +12,6 @@ const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 const pcPeers = {};
 let localStream;
 
-let localNotification = null
-
-function scheduleNotification(msg) {
-  // if (localNotification) {
-  //   NotificationsIOS.cancelLocalNotification(localNotification)
-  // }
-
-  // localNotification = NotificationsIOS.localNotification({
-  //   alertBody: msg,
-  //   alertTitle: "Skylight WebRTC Demo",
-  //   soundName: "chime.aiff",
-  //     silent: false,
-  //   category: "SOME_CATEGORY",
-  //   userInfo: { },
-  //   fireDate: Date.now() + 500,
-  // })
-}
-
 function getLocalStream(isFront, callback) {
 
   let videoSourceId;
@@ -66,8 +48,9 @@ function getLocalStream(isFront, callback) {
   }, logError);
 }
 
-function join(roomID) {
-  socket.emit('join', roomID, function(socketIds){
+function join(roomID, token) {
+  console.log('join', roomID, token)
+  socket.emit('join', {roomID, token}, function(socketIds){
     console.log('join', socketIds);
     for (const i in socketIds) {
       const socketId = socketIds[i];
@@ -122,7 +105,6 @@ function createPC(socketId, isOffer) {
   pc.onaddstream = function (event) {
     console.log('onaddstream', event.stream);
     container.setState({info: 'One peer join!'});
-    scheduleNotification('A new peer has joined!')
 
     const remoteList = container.state.remoteList;
     remoteList[socketId] = event.stream.toURL();
@@ -199,7 +181,6 @@ function leave(socketId) {
   const remoteList = container.state.remoteList;
   delete remoteList[socketId]
   container.setState({ remoteList, info: 'One peer leave!' });
-  scheduleNotification('Peer has left')
 }
 
 let socket = null
@@ -212,10 +193,10 @@ function initSocket() {
 
   socket = io.connect('http://172.26.8.180:4443', {
     transports: ['websocket'],
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax : 5000,
-    reconnectionAttempts: 99999
+    // reconnection: true,
+    // reconnectionDelay: 1000,
+    // reconnectionDelayMax : 5000,
+    // reconnectionAttempts: 99999
   })
 
   socket.on('exchange', function(data){
@@ -284,7 +265,7 @@ export default class extends React.Component {
   _press = (event) => {
     this.refs.roomID.blur();
     this.setState({status: 'connect', info: 'Connecting'});
-    join(this.state.roomID);
+    join(this.state.roomID, this.props.token);
   }
 
   _switchVideoType = () => {
@@ -358,11 +339,6 @@ export default class extends React.Component {
           <Text style={styles.username}>{this.props.username}</Text>
         </TouchableOpacity> : null}
         <View style={styles.container}>
-          {/* <View style={styles.notificationContainer}>
-            <TouchableOpacity>
-              <Button title="Schedule local notification" onPress={() => scheduleNotification('Test')} />
-            </TouchableOpacity>
-          </View> */}
           <Text style={styles.welcome}>
             {this.state.info}
           </Text>
@@ -437,8 +413,5 @@ const styles = StyleSheet.create({
   wrapper: {
     height: '100%',
     backgroundColor: '#F5FCFF',
-  },
-  notificationContainer: {
-
   }
 })
