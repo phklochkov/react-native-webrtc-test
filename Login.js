@@ -32,8 +32,8 @@ export default class extends React.Component {
         <Image source={require('./skylight-logo.png')} style={styles.logo} />
 
         <View style={styles.inputContainer}>
-          <Text>Domain</Text>
           <MaterialInput
+            label="Domain"
             inputStyles={styles.input}
             contextMenuHidden={true}
             autoCapitalize = 'none'
@@ -42,8 +42,8 @@ export default class extends React.Component {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text>Login</Text>
           <MaterialInput
+            label="Login"
             inputStyles={styles.input}
             contextMenuHidden={true}
             autoCapitalize = 'none'
@@ -52,8 +52,8 @@ export default class extends React.Component {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text>Password</Text>
           <MaterialInput
+            label="Password"
             inputStyles={styles.input}
             contextMenuHidden={true}
             secureTextEntry={true}
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   input: {
-    marginTop: 5,
+    marginTop: 10,
   },
   errorText: {
     color: '#ff0033',

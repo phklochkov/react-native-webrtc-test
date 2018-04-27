@@ -40,7 +40,7 @@ function getLocalStream(isFront, callback) {
       },
       facingMode: (isFront ? "user" : "environment"),
       optional: (videoSourceId ? [{sourceId: videoSourceId}] : []),
-    }
+    },
     // video: false,
   }, function (stream) {
     console.log('getUserMedia success', stream);
@@ -96,6 +96,16 @@ function createPC(socketId, isOffer) {
     }
     if (event.target.iceConnectionState === 'connected') {
       createDataChannel();
+    }
+
+    if (event.target.iceConnectionState === 'closed') {
+      console.log('closed')
+      container && container.setState(s => ({
+        ...container.initialState,
+        selfViewSrc: s.selfViewSrc,
+        status: s.status,
+        info: s.info,
+      }))
     }
   };
   pc.onsignalingstatechange = function(event) {
@@ -193,10 +203,10 @@ function initSocket() {
 
   socket = io.connect('http://172.26.8.180:4443', {
     transports: ['websocket'],
-    // reconnection: true,
-    // reconnectionDelay: 1000,
-    // reconnectionDelayMax : 5000,
-    // reconnectionAttempts: 99999
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax : 5000,
+    reconnectionAttempts: 99999
   })
 
   socket.on('exchange', function(data){
@@ -207,12 +217,17 @@ function initSocket() {
     leave(socketId)
   })
 
+  socket.on('disconnect', function() {
+    console.log('disconnect')
+  })
+
   socket.on('connect', function(data) {
     console.log('connect')
     getLocalStream(true, function(stream) {
       localStream = stream
-      container.setState({selfViewSrc: stream.toURL()})
-      container.setState({status: 'ready', info: 'Please enter room ID'})
+      container.setState({selfViewSrc: stream.toURL(), status: 'connect', info: 'Connecting'})
+      // container.setState({status: 'ready', info: 'Please enter room ID'})
+      join('upskill', container.props.token)
     })
   })
 }
@@ -232,7 +247,8 @@ function mapHash(hash, func) {
 
 function getStats() {
   const pc = pcPeers[Object.keys(pcPeers)[0]];
-  if (pc.getRemoteStreams()[0] && pc.getRemoteStreams()[0].getAudioTracks()[0]) {
+  if (pc && pc.getRemoteStreams && pc.getRemoteStreams()[0] &&
+    pc.getRemoteStreams()[0].getAudioTracks()[0]) {
     const track = pc.getRemoteStreams()[0].getAudioTracks()[0];
     console.log('track', track);
     pc.getStats(track, function(report) {
@@ -245,7 +261,7 @@ let container;
 
 export default class extends React.Component {
   ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true})
-  state =  {
+  initialState = {
     info: 'Initializing',
     status: 'init',
     roomID: '',
@@ -257,13 +273,29 @@ export default class extends React.Component {
     textRoomValue: '',
   }
 
+  // appState = AppState.currentState
+
+  state =  this.initialState
+
+  // onAppStateChange = (nextAppState) => {
+  //   if (this.appState.match(/inactive|background/) && nextAppState === 'active') {
+  //     this._press()
+  //   }
+  // }
+
+
   componentDidMount() {
+    // AppState.addEventListener('change', this.onAppStateChange)
     container = this
     initSocket()
   }
 
+  // componentWillUnmount() {
+  //   AppState.removeEventListener('change', this.onAppStateChange)
+  // }
+
   _press = (event) => {
-    this.refs.roomID.blur();
+    this.refs.roomID && this.refs.roomID.blur();
     this.setState({status: 'connect', info: 'Connecting'});
     join(this.state.roomID, this.props.token);
   }
@@ -353,7 +385,7 @@ export default class extends React.Component {
               <Text>Switch camera</Text>
             </TouchableOpacity>
           </View> */}
-          { this.state.status == 'ready' ?
+          {/* { this.state.status == 'ready' ?
             (<View style={styles.readyContainer}>
               <View style={{borderBottomWidth: 1, borderBottomColor: '#00aaed', width: '70%', alignSelf: 'center'}}>
                 <TextInput
@@ -367,7 +399,7 @@ export default class extends React.Component {
                 <Button title="Enter room" onPress={this._press} />
               </TouchableOpacity>
             </View>) : null
-          }
+          } */}
           <RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
           {
             mapHash(this.state.remoteList, function(remote, index) {

@@ -8,8 +8,11 @@ import Login from './Login'
 import UserList from './UserList'
 import Call from './Call'
 
-// console.disableYellowBox = true
+// Don't forget to comment out!
+console.disableYellowBox = true
 
+// The whole idea of this `POC` is something along the lines -
+// Do better, much much better... :(
 class RCTWebRTCDemo extends React.Component {
   state = {
     appState: 'login',
