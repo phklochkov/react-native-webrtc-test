@@ -6,6 +6,7 @@ import {RTCPeerConnection, RTCMediaStream, RTCIceCandidate, RTCSessionDescriptio
   RTCView, MediaStreamTrack, getUserMedia, } from 'react-native-webrtc'
 
 import io from 'socket.io-client'
+import config from './config/config'
 
 const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 
@@ -201,7 +202,7 @@ function initSocket() {
     return
   }
 
-  socket = io.connect('http://172.26.8.180:4443', {
+  socket = io.connect(config.callUrl, {
     transports: ['websocket'],
     reconnection: true,
     reconnectionDelay: 1000,

@@ -2,17 +2,30 @@ import React from 'react';
 import {AppRegistry, Text} from 'react-native'
 import NotificationsIOS from 'react-native-notifications'
 
+import Analytics from 'appcenter-analytics'
+
 import {sendDeviceToken} from './lib/http'
 
 import Login from './Login'
 import UserList from './UserList'
 import Call from './Call'
 
-// Don't forget to comment out!
-console.disableYellowBox = true
+// console.disableYellowBox = true
 
-// The whole idea of this `POC` is something along the lines -
-// Do better, much much better... :(
+const checkAnalytics = () => {
+  return Analytics.isEnabled()
+    .then(enabled => {
+      if (!enabled) {
+        console.log('Analytics is disabled, enabling...')
+        return Analytics.setEnabled(true)
+      }
+
+      return Promise.resolve()
+    })
+    .then(r => console.log('Analytics is enabled!', r))
+    .catch(e => console.log('Analytics enable error.'))
+}
+
 class RCTWebRTCDemo extends React.Component {
   state = {
     appState: 'login',
@@ -40,6 +53,12 @@ class RCTWebRTCDemo extends React.Component {
     NotificationsIOS.addEventListener('remoteNotificationsRegistered', this.onPushRegistered)
     NotificationsIOS.addEventListener('remoteNotificationsRegistrationFailed', this.onPushRegistrationFailed)
     NotificationsIOS.requestPermissions()
+
+    Analytics.trackEvent('Application has started.')
+      .then(x => {console.log('success', x)})
+      .catch(e => {console.log('error', e)})
+
+    checkAnalytics()
   }
 
   componentWillUnmount() {
