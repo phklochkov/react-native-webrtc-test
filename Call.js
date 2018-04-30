@@ -1,9 +1,26 @@
 import React from 'react'
-import { StyleSheet, Text, Button, TouchableOpacity, View, TextInput,
-  ListView, Platform } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  Button,
+  TouchableOpacity,
+  View,
+  TextInput,
+  ListView,
+  Platform
+} from 'react-native'
 import NotificationsIOS from 'react-native-notifications'
-import {RTCPeerConnection, RTCMediaStream, RTCIceCandidate, RTCSessionDescription,
-  RTCView, MediaStreamTrack, getUserMedia, } from 'react-native-webrtc'
+import {
+  RTCPeerConnection,
+  RTCMediaStream,
+  RTCIceCandidate,
+  RTCSessionDescription,
+  RTCView,
+  MediaStreamTrack,
+  getUserMedia,
+} from 'react-native-webrtc'
+
+import {TextRoom} from './TextRoom'
 
 import io from 'socket.io-client'
 import config from './config/config'
@@ -341,25 +358,6 @@ export default class extends React.Component {
     this.setState({textRoomData, textRoomValue: ''});
   }
 
-  _renderTextRoom = () => {
-    return (
-      <View style={styles.listViewContainer}>
-        <ListView
-          dataSource={this.ds.cloneWithRows(this.state.textRoomData)}
-          renderRow={rowData => <Text>{`${rowData.user}: ${rowData.message}`}</Text>}
-          />
-        <TextInput
-          style={{width: 200, height: 30, borderColor: 'gray', borderWidth: 1}}
-          onChangeText={value => this.setState({textRoomValue: value})}
-          value={this.state.textRoomValue} />
-        <TouchableOpacity
-          onPress={this._textRoomPress}>
-          <Text>Send</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   onSignOut = () => {
     this.props.onSetAppState('login')
   }
@@ -375,32 +373,12 @@ export default class extends React.Component {
           <Text style={styles.welcome}>
             {this.state.info}
           </Text>
-          {/* {this.state.textRoomConnected && this._renderTextRoom()} */}
-          {/* <View style={{flexDirection: 'row'}}>
-            <Text>
-              {this.state.isFront ? "Use front camera" : "Use back camera"}
-            </Text>
-            <TouchableOpacity
-              style={{borderWidth: 1, borderColor: 'black'}}
-              onPress={this._switchVideoType}>
-              <Text>Switch camera</Text>
-            </TouchableOpacity>
-          </View> */}
-          {/* { this.state.status == 'ready' ?
-            (<View style={styles.readyContainer}>
-              <View style={{borderBottomWidth: 1, borderBottomColor: '#00aaed', width: '70%', alignSelf: 'center'}}>
-                <TextInput
-                  ref='roomID'
-                  autoCorrect={false}
-                  style={{ width: '100%', height: 40, alignSelf: 'center'}}
-                  onChangeText={(text) => this.setState({roomID: text})}
-                  value={this.state.roomID} />
-              </View>
-              <TouchableOpacity style={{marginTop: 10}}>
-                <Button title="Enter room" onPress={this._press} />
-              </TouchableOpacity>
-            </View>) : null
-          } */}
+          {this.state.textRoomConnected && <TextRoom
+            ds={this.ds}
+            onChangeText={v => this.setState({textRoomValue: v})}
+            data={this.state.textRoomData}
+            value={this.state.textRoomValue}
+            onSend={this._textRoomPress} />}
           <RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
           {
             mapHash(this.state.remoteList, function(remote, index) {
@@ -430,9 +408,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
-  },
-  listViewContainer: {
-    height: 150,
   },
   username: {
     fontSize: 18,

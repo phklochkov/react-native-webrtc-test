@@ -74,6 +74,7 @@ export default class extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
   },
   inputLabel: {
     fontSize: 16,

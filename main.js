@@ -10,7 +10,7 @@ import Login from './Login'
 import UserList from './UserList'
 import Call from './Call'
 
-// console.disableYellowBox = true
+console.disableYellowBox = true
 
 const checkAnalytics = () => {
   return Analytics.isEnabled()
@@ -28,7 +28,7 @@ const checkAnalytics = () => {
 
 class RCTWebRTCDemo extends React.Component {
   state = {
-    appState: 'login',
+    appState: 'main',
     username: '',
     token: null
   }
