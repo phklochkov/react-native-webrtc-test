@@ -1,5 +1,5 @@
 import React from 'react'
-import {FlatList, View, Text, StyleSheet, Dimensions} from 'react-native'
+import {FlatList, View, Text, StyleSheet, Dimensions, TouchableOpacity} from 'react-native'
 
 export default class CardSequence extends React.Component {
   state = { screen: Dimensions.get('screen') }
@@ -8,12 +8,21 @@ export default class CardSequence extends React.Component {
 
   renderItem = x => {
     const { item } = x
+    const disabled = !item.component || item.component.componentType !== 'openSequence'
+    const onCardPress = () => {
+      this.props.onCardPress(item.id)
+    }
 
     // Show only 3 card.
     return (
-      <View style={[styles.cardWrapper, {width: (this.state.screen.width / 3) - 15,}]}>
-        <Text style={styles.cardLabel}>{item.label}</Text>
-      </View>
+      <TouchableOpacity
+        style={[styles.cardWrapper, {width: (this.state.screen.width / 3) - 15,}]}
+        disabled={disabled}
+        onPress={onCardPress}>
+        {/* <View> */}
+          <Text style={styles.cardLabel}>{item.label}</Text>
+        {/* </View> */}
+      </TouchableOpacity>
     )
   }
 
@@ -32,6 +41,9 @@ export default class CardSequence extends React.Component {
   render() {
     return (
       <View style={styles.wrapper}>
+        <TouchableOpacity onPress={this.props.onBack}>
+          <Text style={styles.returnIcon}>&#9650;</Text>
+        </TouchableOpacity>
         <FlatList
           horizontal={true}
           data={this.props.cards}
@@ -45,10 +57,11 @@ export default class CardSequence extends React.Component {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    flexDirection: 'row',
+    // flexDirection: 'row',
     backgroundColor: '#000',
     paddingHorizontal: 10,
     paddingVertical: 30,
+    justifyContent: 'space-between',
   },
   cardWrapper: {
     flex: 1,
@@ -65,5 +78,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 22,
     textAlign: 'center',
+  },
+  returnIcon: {
+    color: '#fff',
+    fontSize: 30,
+    transform: [{scaleX: 2}],
+    alignSelf: 'center',
   },
 })

@@ -4,7 +4,7 @@ import {getAssignments, getSequences, getSequenceCards, getAllSequenceCards} fro
 import CardSequence from './components/CardSequence'
 
 export default class extends React.Component {
-  state = {assignments: [], isLoading: false, sequences: [], cards: [], assignmentId: null}
+  state = {assignments: [], isLoading: false, sequences: [], cards: [], assignmentId: null, path: []}
 
   keyExtractor = x => x.id
 
@@ -32,9 +32,12 @@ export default class extends React.Component {
       if (s) {
         const cards = await getSequenceCards(id, s.id)
         if (cards && cards.length) {
-          this.setState({sequences, cards, assignmentId: id, isLoading: false})
+          this.setState(state => ({sequences, cards, assignmentId: id, isLoading: false, path: [...state.path, s.id]}))
+          return
         }
       }
+
+      this.setState({isLoading: false})
     } catch (e) {
       this.setState({isLoading: false})
       console.log('Failed to load sequence', e)
@@ -64,10 +67,21 @@ export default class extends React.Component {
     try {
       const cards = await getSequenceCards(this.state.assignmentId, seqId)
       if (cards && cards.length) {
-        this.setState({cards, isLoading: false})
+        this.setState(s => ({cards, isLoading: false, path: [...s.path, seqId]}))
       }
     } catch (e) {
       this.setState({isLoading: false})
+    }
+  }
+
+  onPrevSequence = () => {
+    const {path} = this.state
+    if (path.length > 1) {
+      const seqId = path.slice(-2)[0]
+      this.setState({path: path.slice(0, -2)})
+      this.onCardPress(seqId)
+    } else {
+      this.setState({assignmentId: null, cards: [], sequences: [], path: []})
     }
   }
 
@@ -87,7 +101,8 @@ export default class extends React.Component {
       <View style={styles.wrapper}>
         {cards && cards.length ? <CardSequence
           cards={cards}
-          onCardPress={this.onCardPress} /> :
+          onCardPress={this.onCardPress}
+          onBack={this.onPrevSequence} /> :
           this.renderAssignmentsList()}
       </View>
     )
