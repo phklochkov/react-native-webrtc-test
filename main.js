@@ -9,6 +9,7 @@ import {sendDeviceToken} from './lib/http'
 import Login from './Login'
 import UserList from './UserList'
 import Call from './Call'
+import Assignments from './Assignments'
 
 console.disableYellowBox = true
 
@@ -28,7 +29,7 @@ const checkAnalytics = () => {
 
 class RCTWebRTCDemo extends React.Component {
   state = {
-    appState: 'main',
+    appState: 'assignments',//'main',
     username: '',
     token: null
   }
@@ -82,6 +83,8 @@ class RCTWebRTCDemo extends React.Component {
         return <Login onSetAppState={this.setAppState} />
       case 'list':
         return <UserList onSetAppState={this.setAppState} onSetUsername={this.setUsername} />
+      case 'assignments':
+        return <Assignments />
       case 'main':
         return <Call
           onSetAppState={this.setAppState}
