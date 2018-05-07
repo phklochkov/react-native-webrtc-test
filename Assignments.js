@@ -88,7 +88,7 @@ export default class extends React.Component {
   async componentDidMount() {
     try {
       const assignments = await getAssignments()
-      this.setState({ assignments: this.sortAssignments(assignments) })
+      this.setState({ assignments: this.sortAssignments(assignments, 'created') })
     } catch (e) {
       console.log('Failed to load assignments', e)
     }
