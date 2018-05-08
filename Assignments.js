@@ -1,10 +1,19 @@
 import React from 'react'
-import {StyleSheet, FlatList, View, Text, TouchableOpacity} from 'react-native'
+import {StyleSheet, FlatList, View, Text, TouchableOpacity, ActivityIndicator} from 'react-native'
 import {getAssignments, getSequences, getSequenceCards, getAllSequenceCards} from './lib/http'
 import CardSequence from './components/CardSequence'
 
 export default class extends React.Component {
-  state = {assignments: [], isLoading: false, sequences: [], cards: [], assignmentId: null, path: []}
+  state = {
+    assignments: [],
+    isLoading: false,
+    isSequenceLoading: false,
+    sequences: [],
+    cards: [],
+    assignmentId: null,
+    path: [],
+    error: null,
+  }
 
   keyExtractor = x => x.id
 
@@ -25,6 +34,7 @@ export default class extends React.Component {
 
   getSequence = async id => {
     this.setState({isLoading: true})
+
     try {
       const sequences = await getSequences(id)
       const s = sequences.find(x => x.id === 'root') // Find root sequence.
@@ -39,8 +49,9 @@ export default class extends React.Component {
 
       this.setState({isLoading: false})
     } catch (e) {
-      this.setState({isLoading: false})
-      console.log('Failed to load sequence', e)
+      const error = 'Failed to load sequence'
+      this.setState({isLoading: false, error})
+      console.log(error, e)
     }
   }
 
@@ -63,14 +74,14 @@ export default class extends React.Component {
       return
     }
 
-    this.setState({isLoading: true})
+    this.setState({isSequenceLoading: true})
     try {
       const cards = await getSequenceCards(this.state.assignmentId, seqId)
       if (cards && cards.length) {
-        this.setState(s => ({cards, isLoading: false, path: [...s.path, seqId]}))
+        this.setState(s => ({cards, isSequenceLoading: false, path: [...s.path, seqId]}))
       }
     } catch (e) {
-      this.setState({isLoading: false})
+      this.setState({isSequenceLoading: false})
     }
   }
 
@@ -86,16 +97,27 @@ export default class extends React.Component {
   }
 
   async componentDidMount() {
+    this.setState({isLoading: true})
     try {
       const assignments = await getAssignments()
-      this.setState({ assignments: this.sortAssignments(assignments, 'created') })
+      this.setState({ assignments: this.sortAssignments(assignments, 'created'), isLoading: false })
     } catch (e) {
-      console.log('Failed to load assignments', e)
+      const error = 'Failed to load assignments'
+      this.setState({isLoading: false, error})
+      console.log(error, e)
     }
   }
 
   render() {
-    const { cards } = this.state
+    const { cards, isLoading } = this.state
+
+    if (isLoading) {
+      return (
+        <View style={styles.loadingWrapper}>
+          <ActivityIndicator style={styles.loadingIndicator} size="large" color="#00aaed" />
+        </View>
+      )
+    }
 
     return (
       <View style={styles.wrapper}>
@@ -122,6 +144,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     alignSelf: 'center',
   },
+
   listItem: {
     justifyContent: 'center',
     padding: 15,
@@ -132,4 +155,11 @@ const styles = StyleSheet.create({
   listItemName: {
     fontSize: 14,
   },
+
+  loadingWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  loadingIndicator: {},
 })

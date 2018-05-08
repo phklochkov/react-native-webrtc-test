@@ -8,20 +8,22 @@ export default class CardSequence extends React.Component {
 
   renderItem = x => {
     const { item } = x
-    const disabled = !item.component || item.component.componentType !== 'openSequence'
     const onCardPress = () => {
       this.props.onCardPress(item.id)
     }
+    const disabled = !item.component || item.component.componentType !== 'openSequence'
+    const wrapperStyle = {
+      width: (this.state.screen.width / 3) - 15,
+      borderBottomColor: disabled ? '#414042' : '#00aaed'
+    }
 
-    // Show only 3 card.
+    // Show only 3 cards.
     return (
       <TouchableOpacity
-        style={[styles.cardWrapper, {width: (this.state.screen.width / 3) - 15,}]}
+        style={[styles.cardWrapper, wrapperStyle]}
         disabled={disabled}
         onPress={onCardPress}>
-        {/* <View> */}
           <Text style={styles.cardLabel}>{item.label}</Text>
-        {/* </View> */}
       </TouchableOpacity>
     )
   }
@@ -71,7 +73,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     flexWrap: 'wrap',
     borderBottomWidth: 5,
-    borderBottomColor: '#414042',
   },
   cardLabel: {
     color: '#fff',

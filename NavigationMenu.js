@@ -22,9 +22,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: 80,
     alignItems: 'center',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderTopColor: '#ededed',
+    borderBottomColor: '#ededed',
   },
   itemText: {
-    fontSize: 24,
+    fontSize: 22,
   },
-  itemImg: {},
+  itemImg: {
+    marginHorizontal: 15,
+  },
 })
