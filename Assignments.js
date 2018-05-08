@@ -1,5 +1,6 @@
 import React from 'react'
-import {StyleSheet, FlatList, View, Text, TouchableOpacity, ActivityIndicator} from 'react-native'
+import {StyleSheet, FlatList, View, Text, Image,
+  TouchableOpacity, ActivityIndicator} from 'react-native'
 import {getAssignments, getSequences, getSequenceCards, getAllSequenceCards} from './lib/http'
 import CardSequence from './components/CardSequence'
 
@@ -27,6 +28,7 @@ export default class extends React.Component {
     return (
       <TouchableOpacity style={styles.listItem} disabled={this.state.isLoading}
         delayPressIn={25} onPress={onItemPress}>
+        <Image source={require('./clipboard.png')} style={styles.listItemIcon} />
         <Text style={[styles.listItemName, {opacity: isLoading ? 0.5 : 1}]}>{item.name}</Text>
       </TouchableOpacity>
     )
@@ -146,14 +148,19 @@ const styles = StyleSheet.create({
   },
 
   listItem: {
-    justifyContent: 'center',
+    // justifyContent: 'center',
+    alignItems: 'center',
     padding: 15,
     borderTopWidth: 1,
     borderColor: '#ededed',
     height: 50,
+    flexDirection: 'row',
+  },
+  listItemIcon: {
+    marginRight: 10,
   },
   listItemName: {
-    fontSize: 14,
+    fontSize: 16,
   },
 
   loadingWrapper: {
