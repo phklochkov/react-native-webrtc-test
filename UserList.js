@@ -6,10 +6,11 @@ export default class extends React.Component {
   state = {users: []}
 
   componentDidMount() {
-    getUserList().then(users => {
+    getUserList()
+    .then(users => {
       this.setState({users: users.slice(0, 50)})
     })
-    .error(e => console.log('error', e))
+    .catch(e => console.log('error', e))
   }
 
   onItemPress = u => {

@@ -16,7 +16,8 @@ export default class extends React.Component {
     if (domain && login && password) {
       postLogin(login.trim(), password.trim(), domain.trim())
         .then(a => {
-          this.props.onSetAppState('list')
+          // this.props.onSetAppState('list')
+          this.props.onSetAppState('navmenu')
         })
         .catch(e => {
           console.log('e', e)

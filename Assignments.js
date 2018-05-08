@@ -17,7 +17,7 @@ export default class extends React.Component {
 
     return (
       <TouchableOpacity style={styles.listItem} disabled={this.state.isLoading}
-        delayPressIn={20} onPress={onItemPress}>
+        delayPressIn={25} onPress={onItemPress}>
         <Text style={[styles.listItemName, {opacity: isLoading ? 0.5 : 1}]}>{item.name}</Text>
       </TouchableOpacity>
     )
@@ -125,8 +125,9 @@ const styles = StyleSheet.create({
   listItem: {
     justifyContent: 'center',
     padding: 15,
-    marginVertical: 2,
-    backgroundColor: '#ededed',
+    borderTopWidth: 1,
+    borderColor: '#ededed',
+    height: 50,
   },
   listItemName: {
     fontSize: 14,

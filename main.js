@@ -10,6 +10,7 @@ import Login from './Login'
 import UserList from './UserList'
 import Call from './Call'
 import Assignments from './Assignments'
+import NavigationMenu from './NavigationMenu'
 
 console.disableYellowBox = true
 
@@ -27,9 +28,14 @@ const checkAnalytics = () => {
     .catch(e => console.log('Analytics enable error.'))
 }
 
+const NAV_ITEMS = [
+  {path: 'users', img: require('./account.png'), text: 'Users'},
+  {path: 'assignments', img: require('./clipboard.png'), text: 'Assignments'},
+]
+
 class RCTWebRTCDemo extends React.Component {
   state = {
-    appState: 'assignments',//'main',
+    appState: 'login',
     username: '',
     token: null
   }
@@ -81,7 +87,9 @@ class RCTWebRTCDemo extends React.Component {
     switch (appState) {
       case 'login':
         return <Login onSetAppState={this.setAppState} />
-      case 'list':
+      case 'navmenu':
+        return <NavigationMenu onNavigate={this.setAppState} items={NAV_ITEMS} />
+      case 'users':
         return <UserList onSetAppState={this.setAppState} onSetUsername={this.setUsername} />
       case 'assignments':
         return <Assignments />
